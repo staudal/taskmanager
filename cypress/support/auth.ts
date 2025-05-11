@@ -1,7 +1,21 @@
+import { faker } from "@faker-js/faker";
+
 declare global {
   // eslint-disable-next-line @typescript-eslint/no-namespace
   namespace Cypress {
     interface Chainable {
+      /**
+       * Logs in with a random user. Yields the user and adds an alias to the user
+       *
+       * @returns {typeof login}
+       * @memberof Chainable
+       * @example
+       *    cy.quickLogin()
+       * @example
+       *    cy.quickLogin({ email: 'whatever@example.com' })
+       */
+      quickLogin: typeof quickLogin;
+
       /**
        * Logs in a user via the UI with the provided email and password.
        *
@@ -65,6 +79,23 @@ declare global {
   }
 }
 
+function quickLogin({
+  email = faker.internet.email({ provider: "example.com" }),
+}: {
+  email?: string;
+} = {}) {
+  cy.then(() => ({ email })).as("user");
+  cy.exec(`npx tsx ./cypress/support/create-user.ts "${email}"`).then(
+    ({ stdout }) => {
+      const cookieValue = stdout
+        .replace(/.*<cookie>(?<cookieValue>.*)<\/cookie>.*/s, "$<cookieValue>")
+        .trim();
+      cy.setCookie("__session", cookieValue);
+    },
+  );
+  return cy.get("@user");
+}
+
 function login({ email, password }: { email: string; password: string }) {
   // Store both email and password as the user alias
   cy.wrap({ email, password }).as("user");
@@ -119,6 +150,7 @@ function logout() {
 }
 
 export const registerAuthCommands = () => {
+  Cypress.Commands.add("quickLogin", quickLogin);
   Cypress.Commands.add("login", login);
   Cypress.Commands.add("cleanupUser", cleanupUser);
   Cypress.Commands.add("visitAndCheck", visitAndCheck);

@@ -14,13 +14,8 @@ function getTaskIdFromUrl(url: string) {
 
 describe("tasks tests", () => {
   beforeEach(() => {
-    // Set up a user account and log in before each test
-    const email = faker.internet.username() + "@example.com";
-    const password = faker.internet.password();
-    cy.then(() => ({ email })).as("user");
-
-    cy.signup(email, password);
-    cy.url().should("include", "/tasks");
+    cy.quickLogin();
+    cy.visitAndCheck("/tasks");
   });
 
   afterEach(() => {
