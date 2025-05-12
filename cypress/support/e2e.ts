@@ -1,7 +1,9 @@
 import "@testing-library/cypress/add-commands";
 import { registerAuthCommands } from "./auth";
+import { registerGlobalCommands } from "./global";
 import { registerTaskCommands } from "./task";
 
+registerGlobalCommands();
 registerAuthCommands();
 registerTaskCommands();
 

@@ -1,21 +1,15 @@
 import { faker } from "@faker-js/faker";
 
-function createRandomTask(color = "bg-green-100") {
-  const title = faker.lorem.words(3);
-  const body = faker.lorem.paragraph();
-  return { title, body, color };
-}
-
-function getTaskIdFromUrl(url: string) {
-  const match = url.match(/\/tasks\/(.+)$/);
-  if (!match || !match[1]) throw new Error("Could not extract taskId from URL");
-  return match[1];
-}
+const testTask = {
+  title: faker.lorem.words(3),
+  body: faker.lorem.paragraph(),
+  color: "bg-green-100",
+};
 
 describe("tasks tests", () => {
   beforeEach(() => {
     cy.quickLogin();
-    cy.visitAndCheck("/tasks");
+    cy.navigateAndCheckPathname("/tasks");
   });
 
   afterEach(() => {
@@ -23,52 +17,92 @@ describe("tasks tests", () => {
   });
 
   it("should allow creating a new task", () => {
-    const task = createRandomTask();
-    cy.createTask(task);
-    cy.findByText(task.title).should("exist");
+    cy.createTask(testTask);
+
+    cy.findByText(testTask.title).should("exist");
+    cy.findByText(testTask.body).should("exist");
+    cy.findByText(testTask.title).click();
+    cy.extractTaskIdFromUrl().then((taskId) => {
+      cy.navigateAndCheckPathname("/tasks");
+      cy.taskShouldExistInList(taskId);
+    });
   });
 
-  it("should show validation errors when submitting an empty task", () => {
+  it("should show validation errors when title not specified", () => {
     cy.findByRole("link", { name: /create new task/i }).click();
-    cy.url().should("include", "/tasks/new");
+    cy.checkPathname("/tasks/new");
     cy.findByRole("button", { name: /save/i }).click();
+
     cy.findByText(/title is required/i).should("exist");
   });
 
   it("should allow viewing a task's details", () => {
-    const task = createRandomTask();
-    cy.createTask(task);
-    cy.findByText(task.title).click();
-    cy.url().should("include", "/tasks/");
-    cy.url().should("not.include", "/edit");
-    cy.findByText(task.title).should("exist");
-    cy.findByText(task.body).should("exist");
+    cy.createTask(testTask);
+    cy.findByText(testTask.title).click();
+    cy.checkPathname("/tasks/");
+
+    cy.findByText(testTask.title).should("exist");
+    cy.findByText(testTask.body).should("exist");
   });
 
   it("should allow editing a task from the details page", () => {
-    const task = createRandomTask();
-    const newTask = createRandomTask("bg-blue-100");
-    cy.createTask(task);
-    cy.findByText(task.title).click();
-    cy.findByRole("link", { name: /edit/i }).click();
-    cy.editTask({
-      title: newTask.title,
-      body: newTask.body,
-      color: newTask.color,
+    cy.createTask(testTask);
+    cy.editTask(testTask.title);
+    cy.extractTaskIdFromUrl().then((taskId) => {
+      cy.navigateAndCheckPathname("/tasks");
+      cy.taskShouldExistInList(taskId);
     });
-    cy.findByText(newTask.title).should("exist");
-    cy.findByText(newTask.body).should("exist");
+    cy.findByText(testTask.title).should("not.exist");
+    cy.findByText(testTask.body).should("not.exist");
   });
 
   it("should allow deleting a task from the details page", () => {
-    const task = createRandomTask();
-    cy.createTask(task);
-    cy.findByText(task.title).click();
-    cy.url().then((url) => {
-      const taskId = getTaskIdFromUrl(url);
+    cy.createTask(testTask);
+    cy.findByText(testTask.title).click();
+
+    cy.extractTaskIdFromUrl().then((taskId) => {
+      cy.navigateAndCheckPathname("/tasks");
+      cy.taskShouldExistInList(taskId);
+      cy.findByText(testTask.title).click();
       cy.deleteTask(taskId);
-      cy.url().should("eq", `${Cypress.config().baseUrl}/tasks`);
-      cy.findByText(task.title).should("not.exist");
+      cy.checkPathname("/tasks");
+      cy.taskShouldNotExistInList(taskId);
     });
+  });
+
+  it("should show 'Move to In Progress' button when task is in 'Todo' state", () => {
+    cy.createTask(testTask);
+    cy.findByText(testTask.title).click();
+
+    cy.findByText("Move to Todo").should("not.exist");
+    cy.findByText("Move to In Progress").should("exist");
+    cy.findByText("Move to Done").should("not.exist");
+  });
+
+  it("should show 'Move to Todo' and 'Move to Done' buttons when task is in 'In Progress' state", () => {
+    cy.createTask(testTask);
+    cy.findByText(testTask.title).click();
+
+    cy.findByText("Move to In Progress").click();
+    cy.findByText(testTask.title).click();
+
+    cy.findByText("Move to Todo").should("exist");
+    cy.findByText("Move to In Progress").should("not.exist");
+    cy.findByText("Move to Done").should("exist");
+  });
+
+  it("should show 'Move to In Progress' button when task is in 'Done' state", () => {
+    cy.createTask(testTask);
+    cy.findByText(testTask.title).click();
+
+    cy.findByText("Move to In Progress").click();
+    cy.findByText(testTask.title).click();
+
+    cy.findByText("Move to Done").click();
+    cy.findByText(testTask.title).click();
+
+    cy.findByText("Move to Todo").should("not.exist");
+    cy.findByText("Move to In Progress").should("exist");
+    cy.findByText("Move to Done").should("not.exist");
   });
 });
