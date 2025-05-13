@@ -8,7 +8,7 @@ declare global {
   }
 }
 
-function navigateAndCheckPathname(url: string, waitTime = 100) {
+function navigateAndCheckPathname(url: string, waitTime = 1000) {
   cy.visit(url);
   cy.location("pathname").should("contain", url).wait(waitTime);
 }
