@@ -9,9 +9,12 @@ export type { User } from "@prisma/client";
  * Search for users by email
  * Used for finding users to share tasks with
  */
-export async function searchUsersByEmail(email: string, currentUserId: User["id"]) {
+export async function searchUsersByEmail(
+  email: string,
+  currentUserId: User["id"],
+) {
   if (!email) return [];
-  
+
   return prisma.user.findMany({
     where: {
       email: {

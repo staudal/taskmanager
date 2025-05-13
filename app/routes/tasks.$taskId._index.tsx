@@ -46,7 +46,7 @@ export const action = async ({ params, request }: ActionFunctionArgs) => {
     try {
       await deleteTask({ id: params.taskId, userId });
       return redirect("/tasks");
-    } catch (error) {
+    } catch {
       return json(
         { error: "An error occurred while deleting the task" },
         { status: 403 },

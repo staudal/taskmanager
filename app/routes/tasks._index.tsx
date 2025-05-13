@@ -40,11 +40,11 @@ export default function TasksIndexPage() {
 
   return (
     <div className="flex flex-col gap-4">
-      <div className="flex items-center justify-between mb-4">
+      <div className="mb-4 flex items-center justify-between">
         <div className="flex space-x-4">
           <button
             onClick={() => setShowSharedTasks(false)}
-            className={`px-4 py-2 rounded ${
+            className={`rounded px-4 py-2 ${
               !showSharedTasks
                 ? "bg-blue-500 text-white"
                 : "bg-gray-200 text-gray-700"
@@ -54,7 +54,7 @@ export default function TasksIndexPage() {
           </button>
           <button
             onClick={() => setShowSharedTasks(true)}
-            className={`px-4 py-2 rounded ${
+            className={`rounded px-4 py-2 ${
               showSharedTasks
                 ? "bg-blue-500 text-white"
                 : "bg-gray-200 text-gray-700"
@@ -73,8 +73,10 @@ export default function TasksIndexPage() {
 
       <div className="flex flex-col gap-6">
         {showSharedTasks && sharedTasks.length === 0 ? (
-          <div className="text-center py-8">
-            <p className="text-gray-500">No tasks have been shared with you yet.</p>
+          <div className="py-8 text-center">
+            <p className="text-gray-500">
+              No tasks have been shared with you yet.
+            </p>
           </div>
         ) : (
           <>
