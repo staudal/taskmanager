@@ -6,6 +6,12 @@ const testTask = {
   color: "bg-green-100",
 };
 
+const editedTestTask = {
+  title: faker.lorem.words(3),
+  body: faker.lorem.paragraph(),
+  color: "bg-green-100",
+};
+
 describe("tasks tests", () => {
   beforeEach(() => {
     cy.quickLogin();
@@ -19,13 +25,9 @@ describe("tasks tests", () => {
   it("should allow creating a new task", () => {
     cy.createTask(testTask);
 
+    cy.checkPathname("/tasks");
     cy.findByText(testTask.title).should("exist");
     cy.findByText(testTask.body).should("exist");
-    cy.findByText(testTask.title).click();
-    cy.extractTaskIdFromUrl().then((taskId) => {
-      cy.navigateAndCheckPathname("/tasks");
-      cy.taskShouldExistInList(taskId);
-    });
   });
 
   it("should show validation errors when title not specified", () => {
@@ -39,35 +41,38 @@ describe("tasks tests", () => {
   it("should allow viewing a task's details", () => {
     cy.createTask(testTask);
     cy.findByText(testTask.title).click();
-    cy.checkPathname("/tasks/");
 
+    cy.checkPathname("/tasks/");
+    cy.findByText("Task Details").should("exist");
     cy.findByText(testTask.title).should("exist");
     cy.findByText(testTask.body).should("exist");
   });
 
   it("should allow editing a task from the details page", () => {
     cy.createTask(testTask);
-    cy.editTask(testTask.title);
-    cy.extractTaskIdFromUrl().then((taskId) => {
-      cy.navigateAndCheckPathname("/tasks");
-      cy.taskShouldExistInList(taskId);
-    });
+
+    cy.findByText(testTask.title).should("exist");
+    cy.findByText(testTask.body).should("exist");
+
+    cy.editTask(testTask.title, editedTestTask.title, editedTestTask.body);
+
     cy.findByText(testTask.title).should("not.exist");
     cy.findByText(testTask.body).should("not.exist");
+
+    cy.findByText(editedTestTask.title).should("exist");
+    cy.findByText(editedTestTask.body).should("exist");
   });
 
   it("should allow deleting a task from the details page", () => {
     cy.createTask(testTask);
-    cy.findByText(testTask.title).click();
 
-    cy.extractTaskIdFromUrl().then((taskId) => {
-      cy.navigateAndCheckPathname("/tasks");
-      cy.taskShouldExistInList(taskId);
-      cy.findByText(testTask.title).click();
-      cy.deleteTask(taskId);
-      cy.checkPathname("/tasks");
-      cy.taskShouldNotExistInList(taskId);
-    });
+    cy.findByText(testTask.title).should("exist");
+    cy.findByText(testTask.body).should("exist");
+
+    cy.deleteTask(testTask.title);
+
+    cy.findByText(testTask.title).should("not.exist");
+    cy.findByText(testTask.body).should("not.exist");
   });
 
   it("should show 'Move to In Progress' button when task is in 'Todo' state", () => {
