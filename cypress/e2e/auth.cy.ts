@@ -1,79 +1,64 @@
 import { faker } from "@faker-js/faker";
 
+const testUser = {
+  email: faker.internet.username() + "@example.com",
+  password: faker.internet.password(),
+};
+
 describe("auth tests", () => {
   afterEach(() => {
     cy.cleanupUser();
   });
 
-  it("should allow you to register a new user", () => {
-    const email = faker.internet.username() + "@example.com";
-    const password = faker.internet.password();
-    cy.then(() => ({ email })).as("user");
+  beforeEach(() => {
+    cy.then(() => testUser).as("user");
+    cy.visit("/");
+  });
 
-    cy.signup(email, password);
-    cy.url().should("include", "/tasks");
+  it("should allow you to register a new user", () => {
+    cy.signup(testUser);
+    cy.checkPathname("/tasks");
   });
 
   it("should allow you to login as an existing user", () => {
-    // setting up
-    const email = faker.internet.username() + "@example.com";
-    const password = faker.internet.password();
-    cy.then(() => ({ email })).as("user");
-
-    cy.signup(email, password);
+    cy.signup(testUser);
     cy.logout();
-    cy.login({ email, password });
-    cy.url().should("include", "/tasks");
+    cy.login(testUser);
+    cy.checkPathname("/tasks");
   });
 
   it("should show error when user enters already registered email", () => {
-    // setting up
-    const email = faker.internet.username() + "@example.com";
-    const password = faker.internet.password();
-    cy.then(() => ({ email })).as("user");
-
-    cy.signup(email, password);
+    cy.signup(testUser);
     cy.logout();
-    cy.signup(email, password);
+    cy.signup(testUser);
     cy.findByText(/user already exists/i).should("exist");
   });
 
   it("should show error when user enters wrong email or password", () => {
-    // setting up
-    const email = faker.internet.username() + "@example.com";
-    const wrongEmail = faker.internet.username() + "@example.com";
-    const password = faker.internet.password();
-    cy.then(() => ({ email })).as("user");
-
-    cy.signup(email, password);
+    cy.signup(testUser);
     cy.logout();
-    cy.login({ email: wrongEmail, password });
+    cy.login({ email: testUser.email, password: "wrongpassword" });
     cy.findByText(/Invalid email or password/i).should("exist");
   });
 
   it("should navigate between login and register", () => {
-    // setting up
-    const email = faker.internet.username() + "@example.com";
-    cy.then(() => ({ email })).as("user");
-
-    cy.visitAndCheck("/");
     cy.findByRole("link", { name: /sign up/i }).click();
-    cy.url().should("include", "/join");
+    cy.checkPathname("/join");
 
     cy.findByRole("link", { name: /log in/i }).click();
-    cy.url().should("include", "/login");
+    cy.checkPathname("/login");
 
     cy.findByRole("link", { name: /create account/i }).click();
-    cy.url().should("include", "/join");
+    cy.checkPathname("/join");
   });
 
   it("should show warning when password is too short", () => {
-    // setting up
-    const email = faker.internet.username() + "@example.com";
-    const password = faker.internet.password({ length: 4 });
-    cy.then(() => ({ email })).as("user");
-
-    cy.signup(email, password);
+    cy.signup({ email: testUser.email, password: "short" });
     cy.findByText(/Password is too short/i).should("exist");
+  });
+
+  it("should log in as random user when using the quickLogin method", () => {
+    cy.quickLogin();
+    cy.navigateAndCheckPathname("/tasks");
   });
 });

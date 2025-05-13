@@ -8,6 +8,8 @@ interface TaskItemProps {
 export function TaskItem({ task }: TaskItemProps) {
   return (
     <Link
+      id={task.id}
+      data-testid={task.id}
       to={`/tasks/${task.id}`}
       key={task.id}
       className={`flex flex-col gap-4 rounded-lg border p-4 transition-all duration-200 hover:ring-1 ${task.color || "bg-white"}`}

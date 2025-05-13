@@ -2,48 +2,26 @@ declare global {
   // eslint-disable-next-line @typescript-eslint/no-namespace
   namespace Cypress {
     interface Chainable {
-      /**
-       * Creates a new task
-       *
-       * @param params - An objet containing the title, body, and color of the task
-       * @returns {Chainable<void>}
-       * @memberof Chainable
-       * @example
-       *    cy.createTask({ title: 'Task Title', body: 'Task Body', color: 'bg-green-100' })
-       */
       createTask: (params: {
         title: string;
         body: string;
         color: string;
       }) => Cypress.Chainable<void>;
-
-      /**
-       * Edits an existing task
-       *
-       * @param params - An object containing the title, body, and color of the task
-       * @returns {Chainable<void>}
-       * @memberof Chainable
-       * @example
-       *    cy.editTask({ title: 'Updated Title', body: 'Updated Body', color: 'bg-blue-100' })
-       */
-      editTask: (params: {
-        title: string;
-        body: string;
-        color: string;
-      }) => Cypress.Chainable<void>;
-
-      /**
-       * Deletes an existing task
-       *
-       * @param id - The id of the task to delete
-       * @returns {Chainable<void>}
-       * @memberof Chainable
-       * @example
-       *    cy.deleteTask('123')
-       */
+      editTask: (
+        existingTitle: string,
+        newTitle: string,
+        newBody: string,
+      ) => Cypress.Chainable<void>;
       deleteTask: (id: string) => Cypress.Chainable<void>;
     }
   }
+}
+
+function selectTaskColor(color: string) {
+  cy.get(`input[type="radio"][name="color"][value="${color}"]`)
+    .parent()
+    .find("label")
+    .click();
 }
 
 function createTask({
@@ -55,51 +33,34 @@ function createTask({
   body: string;
   color: string;
 }) {
-  // Navigate to new task form
   cy.findByRole("link", { name: /create new task/i }).click();
-  cy.url().should("include", "/tasks/new");
+  cy.checkPathname("/tasks/new");
 
-  // Fill out the task form
   cy.findByLabelText(/title/i).type(title);
   cy.findByLabelText(/body/i).type(body);
-
-  // Select the color by clicking on the appropriate radio button
-  cy.get(`input[type="radio"][name="color"][value="${color}"]`)
-    .parent()
-    .find("label")
-    .click();
+  selectTaskColor(color);
 
   cy.findByRole("button", { name: /save/i }).click();
-
-  // Verify we're redirected to tasks list
-  cy.url().should("include", "/tasks");
+  cy.checkPathname("tasks");
 }
 
-function editTask({
-  title,
-  body,
-  color,
-}: {
-  title: string;
-  body: string;
-  color: string;
-}) {
-  // Fill out the task form
+function editTask(existingTitle: string, newTitle: string, newBody: string) {
+  cy.findByText(existingTitle).click();
+  cy.findByRole("link", { name: /edit/i }).click();
+  cy.checkPathname("/edit");
+
   cy.findByLabelText(/title/i).clear();
-  cy.findByLabelText(/title/i).type(title);
+  cy.findByLabelText(/title/i).type(newTitle);
   cy.findByLabelText(/body/i).clear();
-  cy.findByLabelText(/body/i).type(body);
-
-  cy.get(`input[type="radio"][name="color"][value="${color}"]`)
-    .parent()
-    .find("label")
-    .click();
+  cy.findByLabelText(/body/i).type(newBody);
+  selectTaskColor("bg-blue-100");
 
   cy.findByRole("button", { name: /save/i }).click();
+  cy.checkPathname("tasks");
 }
 
-function deleteTask(id: string) {
-  cy.visitAndCheck(`/tasks/${id}`);
+function deleteTask(title: string) {
+  cy.findByText(title).click();
   cy.findByRole("button", { name: /delete task/i }).click();
 }
 
