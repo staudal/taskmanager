@@ -20,9 +20,11 @@ declare global {
 
 function extractTaskIdFromUrl() {
   return cy.url().then((url) => {
-    const match = url.match(/\/tasks\/(.+)$/);
-    if (!match || !match[1])
-      throw new Error("Could not extract taskId from URL");
+    const match = url.match(/\/tasks\/([^/?#/]+)/);
+    if (!match || !match[1]) {
+      cy.log(`Failed to extract taskId from URL: ${url}`);
+      throw new Error(`Could not extract taskId from URL: ${url}`);
+    }
     return match[1];
   });
 }
