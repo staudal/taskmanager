@@ -5,6 +5,30 @@ import { prisma } from "~/db.server";
 
 export type { User } from "@prisma/client";
 
+/**
+ * Search for users by email
+ * Used for finding users to share tasks with
+ */
+export async function searchUsersByEmail(email: string, currentUserId: User["id"]) {
+  if (!email) return [];
+  
+  return prisma.user.findMany({
+    where: {
+      email: {
+        contains: email,
+      },
+      id: {
+        not: currentUserId, // Don't include the current user
+      },
+    },
+    select: {
+      id: true,
+      email: true,
+    },
+    take: 5, // Limit results for performance
+  });
+}
+
 export async function getUserById(id: User["id"]) {
   return prisma.user.findUnique({ where: { id } });
 }

@@ -13,7 +13,12 @@ import {
   CardHeader,
   CardTitle,
 } from "~/components/ui/card";
-import { deleteTask, getTask, updateTaskStatus } from "~/models/task.server";
+import {
+  deleteTask,
+  getAccessLevelToTask,
+  getTask,
+  updateTaskStatus,
+} from "~/models/task.server";
 import { requireUserId } from "~/session.server";
 
 export const loader = async ({ params, request }: LoaderFunctionArgs) => {
@@ -24,7 +29,10 @@ export const loader = async ({ params, request }: LoaderFunctionArgs) => {
   if (!task) {
     throw new Response("Not Found", { status: 404 });
   }
-  return json({ task });
+
+  const accessLevel = await getAccessLevelToTask(task.id, userId);
+
+  return json({ task, accessLevel });
 };
 
 export const action = async ({ params, request }: ActionFunctionArgs) => {
@@ -35,8 +43,15 @@ export const action = async ({ params, request }: ActionFunctionArgs) => {
   const intent = formData.get("intent");
 
   if (intent === "delete") {
-    await deleteTask({ id: params.taskId, userId });
-    return redirect("/tasks");
+    try {
+      await deleteTask({ id: params.taskId, userId });
+      return redirect("/tasks");
+    } catch (error) {
+      return json(
+        { error: "An error occurred while deleting the task" },
+        { status: 403 },
+      );
+    }
   }
 
   // Handle status update
@@ -47,8 +62,19 @@ export const action = async ({ params, request }: ActionFunctionArgs) => {
       newStatus === "in_progress" ||
       newStatus === "done"
     ) {
-      await updateTaskStatus({ id: params.taskId, userId, status: newStatus });
-      return redirect("/tasks");
+      try {
+        await updateTaskStatus({
+          id: params.taskId,
+          userId,
+          status: newStatus,
+        });
+        return redirect("/tasks");
+      } catch {
+        return json(
+          { error: "An error occurred while updating the task status" },
+          { status: 403 },
+        );
+      }
     }
   }
 
@@ -59,6 +85,7 @@ export default function TaskDetailsPage() {
   const data = useLoaderData<typeof loader>();
   const status = data.task.status;
   const taskId = data.task.id;
+  const accessLevel = data.accessLevel;
 
   return (
     <div className="flex flex-col gap-6">
@@ -67,6 +94,9 @@ export default function TaskDetailsPage() {
       <Card className={data.task.color || "bg-white"}>
         <CardHeader>
           <CardTitle>{data.task.title}</CardTitle>
+          <div className="text-sm text-gray-500">
+            Access level: <span className="capitalize">{accessLevel}</span>
+          </div>
         </CardHeader>
         <CardContent>
           <p className="whitespace-pre-wrap">{data.task.body}</p>
@@ -76,8 +106,12 @@ export default function TaskDetailsPage() {
           </div>
         </CardContent>
         <CardFooter className="flex flex-col justify-between gap-2 md:flex-row">
-          <StatusActions status={status} />
-          <TaskFooterButtons taskId={taskId} />
+          {accessLevel === "owner" || accessLevel === "editor" ? (
+            <>
+              <StatusActions status={status} />
+              <TaskFooterButtons taskId={taskId} accessLevel={accessLevel} />
+            </>
+          ) : null}
         </CardFooter>
       </Card>
     </div>
