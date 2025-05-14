@@ -89,7 +89,7 @@ export default function TaskDetailsPage() {
 
   return (
     <div className="flex flex-col gap-6">
-      <PageTitle title="Task Details" backButton />
+      <PageTitle title="Task Details" backButton taskId={taskId} />
 
       <Card className={data.task.color || "bg-white"}>
         <CardHeader>
