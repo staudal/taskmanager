@@ -118,6 +118,7 @@ export default function ShareTaskPage() {
   const [searchResults, setSearchResults] = useState<
     { id: string; email: string }[]
   >([]);
+  const [hasSearched, setHasSearched] = useState(false);
 
   // Handle successful actions
   useEffect(() => {
@@ -137,6 +138,7 @@ export default function ShareTaskPage() {
   useEffect(() => {
     if (actionData && "users" in actionData) {
       setSearchResults(actionData.users);
+      setHasSearched(true);
     }
   }, [actionData]);
 
@@ -144,6 +146,7 @@ export default function ShareTaskPage() {
     setSelectedUser(user);
     setSearchResults([]);
     setSearchTerm(user.email);
+    setHasSearched(false);
   };
 
   const isSubmitting = navigation.state === "submitting";
@@ -187,6 +190,10 @@ export default function ShareTaskPage() {
                 </li>
               ))}
             </ul>
+          </div>
+        ) : hasSearched ? (
+          <div className="mt-4 p-3 text-center text-gray-500 border border-gray-200 rounded-md">
+            No users found matching your search.
           </div>
         ) : null}
 
