@@ -192,7 +192,7 @@ export default function ShareTaskPage() {
             </ul>
           </div>
         ) : hasSearched ? (
-          <div className="mt-4 p-3 text-center text-gray-500 border border-gray-200 rounded-md">
+          <div className="mt-4 rounded-md border border-gray-200 p-3 text-center text-gray-500">
             No users found matching your search.
           </div>
         ) : null}
