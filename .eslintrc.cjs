@@ -121,7 +121,7 @@ module.exports = {
 
     // Node
     {
-      files: [".eslintrc.js", "mocks/**/*.js", "cypress.config.js"],
+      files: [".eslintrc.js", "cypress.config.js"],
       env: {
         node: true,
       },

@@ -72,6 +72,7 @@ export default function EditTaskPage() {
   const actionData = useActionData<typeof action>();
   const titleRef = useRef<HTMLInputElement>(null);
   const bodyRef = useRef<HTMLTextAreaElement>(null);
+  const taskId = data.task.id;
   const [selectedColor, setSelectedColor] = useState(
     data.task.color || "bg-white",
   );
@@ -86,7 +87,7 @@ export default function EditTaskPage() {
 
   return (
     <div className="flex flex-col gap-6">
-      <PageTitle title="Edit Task" backButton />
+      <PageTitle title="Edit Task" backButton taskId={taskId} />
       <TaskForm
         titleRef={titleRef}
         bodyRef={bodyRef}

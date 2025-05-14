@@ -1,9 +1,8 @@
-import { faker } from "@faker-js/faker";
-
 declare global {
   // eslint-disable-next-line @typescript-eslint/no-namespace
   namespace Cypress {
     interface Chainable {
+      quickCreateUser: typeof quickCreateUser;
       quickLogin: typeof quickLogin;
       login: (params: {
         email: string;
@@ -19,13 +18,14 @@ declare global {
   }
 }
 
-function quickLogin({
-  email = faker.internet.email({ provider: "example.com" }),
-}: {
-  email?: string;
-} = {}) {
+function quickCreateUser(email: string, password: string) {
   cy.then(() => ({ email })).as("user");
-  cy.exec(`npx tsx ./cypress/support/create-user.ts "${email}"`).then(
+  cy.exec(`npx tsx ./cypress/support/create-user.ts "${email}" "${password}"`);
+}
+
+function quickLogin(email: string, password: string) {
+  cy.then(() => ({ email })).as("user");
+  cy.exec(`npx tsx ./cypress/support/login.ts "${email}" "${password}"`).then(
     ({ stdout }) => {
       const cookieValue = stdout
         .replace(/.*<cookie>(?<cookieValue>.*)<\/cookie>.*/s, "$<cookieValue>")
@@ -43,7 +43,7 @@ function login({ email, password }: { email: string; password: string }) {
   cy.findByRole("button", { name: /log in/i }).click();
 }
 
-function cleanupUser({ email }: { email?: string } = {}) {
+function cleanupUser(email: string) {
   if (email) {
     deleteUserByEmail(email);
   } else {
@@ -74,6 +74,7 @@ function logout() {
 }
 
 export const registerAuthCommands = () => {
+  Cypress.Commands.add("quickCreateUser", quickCreateUser);
   Cypress.Commands.add("quickLogin", quickLogin);
   Cypress.Commands.add("login", login);
   Cypress.Commands.add("cleanupUser", cleanupUser);

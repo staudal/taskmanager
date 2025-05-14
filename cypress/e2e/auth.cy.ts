@@ -7,7 +7,7 @@ const testUser = {
 
 describe("auth tests", () => {
   afterEach(() => {
-    cy.cleanupUser();
+    cy.cleanupUser(testUser.email);
   });
 
   beforeEach(() => {
@@ -57,8 +57,9 @@ describe("auth tests", () => {
     cy.findByText(/Password is too short/i).should("exist");
   });
 
-  it("should log in as random user when using the quickLogin method", () => {
-    cy.quickLogin();
+  it("should log in as random user when using the quickCreateUser and quickLogin methods", () => {
+    cy.quickCreateUser(testUser.email, testUser.password);
+    cy.quickLogin(testUser.email, testUser.password);
     cy.navigateAndCheckPathname("/tasks");
   });
 });
