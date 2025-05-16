@@ -13,6 +13,7 @@ import {
   CardHeader,
   CardTitle,
 } from "~/components/ui/card";
+import { checkRateLimit } from "~/lib/rate-limiter";
 import {
   deleteTask,
   getAccessLevelToTask,
@@ -36,6 +37,9 @@ export const loader = async ({ params, request }: LoaderFunctionArgs) => {
 };
 
 export const action = async ({ params, request }: ActionFunctionArgs) => {
+  const rateLimitResponse = await checkRateLimit(request);
+  if (rateLimitResponse) throw rateLimitResponse;
+
   const userId = await requireUserId(request);
   invariant(params.taskId, "taskId not found");
 

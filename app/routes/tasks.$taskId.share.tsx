@@ -13,6 +13,7 @@ import { Button } from "~/components/ui/button";
 import { Input } from "~/components/ui/input";
 import { Label } from "~/components/ui/label";
 import { RadioGroup, RadioGroupItem } from "~/components/ui/radio-group";
+import { checkRateLimit } from "~/lib/rate-limiter";
 import {
   getAccessLevelToTask,
   getTask,
@@ -47,6 +48,9 @@ export const loader = async ({ request, params }: LoaderFunctionArgs) => {
 };
 
 export const action = async ({ request, params }: ActionFunctionArgs) => {
+  const rateLimitResponse = await checkRateLimit(request);
+  if (rateLimitResponse) throw rateLimitResponse;
+
   const userId = await requireUserId(request);
   const formData = await request.formData();
   const taskId = params.taskId as string;

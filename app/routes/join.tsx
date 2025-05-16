@@ -8,6 +8,7 @@ import { useActionData, useSearchParams } from "@remix-run/react";
 import { useEffect, useRef } from "react";
 
 import AuthForm from "~/components/auth-form";
+import { checkRateLimit } from "~/lib/rate-limiter";
 import { createUser, getUserByEmail } from "~/models/user.server";
 import { createUserSession, getUserId } from "~/session.server";
 import { safeRedirect, validateEmail } from "~/utils";
@@ -19,6 +20,9 @@ export const loader = async ({ request }: LoaderFunctionArgs) => {
 };
 
 export const action = async ({ request }: ActionFunctionArgs) => {
+  const rateLimitResponse = await checkRateLimit(request);
+  if (rateLimitResponse) throw rateLimitResponse;
+
   const formData = await request.formData();
   const email = formData.get("email");
   const password = formData.get("password");
