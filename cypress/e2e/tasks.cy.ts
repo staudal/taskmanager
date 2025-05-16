@@ -104,9 +104,16 @@ describe("tasks tests", () => {
       cy.createTask(testTask);
       cy.findByText(testTask.title).click();
 
+      // Click the button and wait for the status to update
       cy.findByTestId("move-to-in-progress-button").click();
+      
+      // Wait for the redirect to complete
+      cy.location('pathname').should('eq', '/tasks');
+      
+      // Navigate back to the task detail page
       cy.findByText(testTask.title).click();
 
+      // Check for the correct buttons
       cy.findByTestId("move-to-todo-button").should("exist");
       cy.findByTestId("move-to-in-progress-button").should("not.exist");
       cy.findByTestId("move-to-done-button").should("exist");
@@ -116,12 +123,17 @@ describe("tasks tests", () => {
       cy.createTask(testTask);
       cy.findByText(testTask.title).click();
 
+      // Move to In Progress
       cy.findByTestId("move-to-in-progress-button").click();
+      cy.location('pathname').should('eq', '/tasks');
       cy.findByText(testTask.title).click();
 
+      // Move to Done
       cy.findByTestId("move-to-done-button").click();
+      cy.location('pathname').should('eq', '/tasks');
       cy.findByText(testTask.title).click();
 
+      // Check for the correct button
       cy.findByTestId("move-to-todo-button").should("not.exist");
       cy.findByTestId("move-to-in-progress-button").should("exist");
       cy.findByTestId("move-to-done-button").should("not.exist");
