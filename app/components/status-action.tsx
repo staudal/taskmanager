@@ -13,6 +13,7 @@ export function StatusActions({ status }: { status: string }) {
           type="submit"
           variant="outline"
           className="flex items-center gap-2"
+          data-testid="move-to-in-progress-button"
         >
           <span>Move to In Progress</span>
           <ArrowRight size={16} />
@@ -30,6 +31,7 @@ export function StatusActions({ status }: { status: string }) {
             type="submit"
             variant="outline"
             className="flex items-center gap-2"
+            data-testid="move-to-todo-button"
           >
             <ArrowLeft size={16} />
             <span>Move to Todo</span>
@@ -42,6 +44,7 @@ export function StatusActions({ status }: { status: string }) {
             type="submit"
             variant="outline"
             className="flex items-center gap-2"
+            data-testid="move-to-done-button"
           >
             <span>Move to Done</span>
             <ArrowRight size={16} />
@@ -59,6 +62,7 @@ export function StatusActions({ status }: { status: string }) {
           type="submit"
           variant="outline"
           className="flex items-center gap-2"
+          data-testid="move-to-in-progress-button"
         >
           <ArrowLeft size={16} />
           <span>Move to In Progress</span>
