@@ -106,10 +106,10 @@ describe("tasks tests", () => {
 
       // Click the button and wait for the status to update
       cy.findByTestId("move-to-in-progress-button").click();
-      
+
       // Wait for the redirect to complete
-      cy.location('pathname').should('eq', '/tasks');
-      
+      cy.location("pathname").should("eq", "/tasks");
+
       // Navigate back to the task detail page
       cy.findByText(testTask.title).click();
 
@@ -125,12 +125,12 @@ describe("tasks tests", () => {
 
       // Move to In Progress
       cy.findByTestId("move-to-in-progress-button").click();
-      cy.location('pathname').should('eq', '/tasks');
+      cy.location("pathname").should("eq", "/tasks");
       cy.findByText(testTask.title).click();
 
       // Move to Done
       cy.findByTestId("move-to-done-button").click();
-      cy.location('pathname').should('eq', '/tasks');
+      cy.location("pathname").should("eq", "/tasks");
       cy.findByText(testTask.title).click();
 
       // Check for the correct button
