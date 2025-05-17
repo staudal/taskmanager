@@ -106,4 +106,4 @@ jobs:
       - name: 🌳 Cypress run
         run: npm run test:e2e:run
         env:
-          NODE_ENV: production
+          NODE_ENV: staging

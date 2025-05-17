@@ -47,17 +47,17 @@ export default function TasksIndexPage() {
             variant={showSharedTasks ? "secondary" : "default"}
             onClick={() => setShowSharedTasks(false)}
           >
-            My Tasks
+            My tasks
           </Button>
           <Button
             variant={showSharedTasks ? "default" : "secondary"}
             onClick={() => setShowSharedTasks(true)}
           >
-            Shared With Me ({sharedTasks.length})
+            Shared with me ({sharedTasks.length})
           </Button>
         </div>
         <Link to="/tasks/new">
-          <Button>New Task</Button>
+          <Button>Create new task</Button>
         </Link>
       </div>
 
