@@ -33,7 +33,7 @@ export async function checkRateLimit(
   request: Request,
 ): Promise<Response | void> {
   // Skip rate limiting for test environments
-  if (process.env.NODE_ENV === "test") {
+  if (process.env.NODE_ENV !== "production") {
     return;
   }
 
