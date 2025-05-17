@@ -3,6 +3,7 @@ import { json, useLoaderData, Link } from "@remix-run/react";
 import { useState } from "react";
 
 import { Swimlanes } from "~/components/swimlanes";
+import { Button } from "~/components/ui/button";
 import { getTaskListItems } from "~/models/task.server";
 import { requireUserId } from "~/session.server";
 
@@ -42,32 +43,21 @@ export default function TasksIndexPage() {
     <div className="flex flex-col gap-4">
       <div className="mb-4 flex items-center justify-between">
         <div className="flex space-x-4">
-          <button
+          <Button
+            variant={showSharedTasks ? "secondary" : "default"}
             onClick={() => setShowSharedTasks(false)}
-            className={`rounded px-4 py-2 ${
-              !showSharedTasks
-                ? "bg-blue-500 text-white"
-                : "bg-gray-200 text-gray-700"
-            }`}
           >
             My Tasks
-          </button>
-          <button
+          </Button>
+          <Button
+            variant={showSharedTasks ? "default" : "secondary"}
             onClick={() => setShowSharedTasks(true)}
-            className={`rounded px-4 py-2 ${
-              showSharedTasks
-                ? "bg-blue-500 text-white"
-                : "bg-gray-200 text-gray-700"
-            }`}
           >
             Shared With Me ({sharedTasks.length})
-          </button>
+          </Button>
         </div>
-        <Link
-          to="/tasks/new"
-          className="rounded bg-blue-500 px-4 py-2 text-white hover:bg-blue-600 focus:bg-blue-400"
-        >
-          New Task
+        <Link to="/tasks/new">
+          <Button>New Task</Button>
         </Link>
       </div>
 

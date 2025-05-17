@@ -1,5 +1,5 @@
-import { Form, Link } from "@remix-run/react";
-import { LogOutIcon, PlusIcon } from "lucide-react";
+import { Form } from "@remix-run/react";
+import { LogOutIcon } from "lucide-react";
 
 import Logo from "./logo";
 import { Button } from "./ui/button";
@@ -9,12 +9,6 @@ export function Header() {
     <div className="flex flex-row items-center justify-between gap-4">
       <Logo />
       <div className="flex flex-row items-center gap-4">
-        <Button asChild className="flex items-center gap-2">
-          <Link to="new">
-            <PlusIcon size={16} />
-            <span>Create new task</span>
-          </Link>
-        </Button>
         <Form action="/logout" method="post">
           <Button
             variant={"secondary"}
