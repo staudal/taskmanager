@@ -30,7 +30,6 @@ export const action = async ({ request }: ActionFunctionArgs) => {
   const redirectTo = safeRedirect(formData.get("redirectTo"), "/tasks");
 
   if (!validateEmail(email)) {
-    await logFailedLogin(email as string, "Invalid email format", request);
     return json(
       { errors: { email: "Email is invalid", password: null } },
       { status: 400 },
