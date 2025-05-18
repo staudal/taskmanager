@@ -63,6 +63,15 @@ export async function requireUser(request: Request) {
   throw await logout(request);
 }
 
+export async function requireAdminUser(request: Request) {
+  const userId = await requireUserId(request);
+
+  const user = await getUserById(userId);
+  if (user && user.role === "admin") return user;
+
+  throw await logout(request);
+}
+
 export async function createUserSession({
   request,
   userId,

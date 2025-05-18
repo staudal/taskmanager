@@ -9,6 +9,7 @@ import { useEffect, useRef } from "react";
 
 import AuthForm from "~/components/auth-form";
 import { checkRateLimit } from "~/lib/rate-limiter";
+import { logSuccessfulSignup } from "~/models/audit-log.server";
 import { createUser, getUserByEmail } from "~/models/user.server";
 import { createUserSession, getUserId } from "~/session.server";
 import { safeRedirect, validateEmail } from "~/utils";
@@ -63,6 +64,9 @@ export const action = async ({ request }: ActionFunctionArgs) => {
   }
 
   const user = await createUser(email, password);
+
+  // Log successful signup
+  await logSuccessfulSignup(user.id, email as string, request);
 
   return createUserSession({
     redirectTo,
