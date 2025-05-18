@@ -1,6 +1,6 @@
-const RATE_LIMIT = 10; // max requests per interval
-const REFILL_INTERVAL = 60 * 1000; // 1 minute
-const TOKENS_PER_INTERVAL = 10;
+const RATE_LIMIT = 100; // max requests per interval
+const REFILL_INTERVAL = 10 * 1000; // 10 seconds
+const TOKENS_PER_INTERVAL = 16; // ~100 requests per minute
 
 interface Bucket {
   tokens: number;

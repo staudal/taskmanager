@@ -14,9 +14,11 @@ model User {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
+  role String @default("user") // "user", "admin"
   password   Password?
   tasks      Task[]       // Tasks created by this user
   taskAccess TaskAccess[] // Tasks this user has access to
+  auditLogs  AuditLog[]   // Audit logs associated with this user
 }
 
 model Password {
@@ -55,4 +57,18 @@ model Task {
 
   // Users who have access to this task
   accessUsers TaskAccess[]
+}
+
+model AuditLog {
+  id        String   @id @default(cuid())
+  action    String   // 'login', 'signup', 'logout', etc.
+  status    String   // 'success', 'failure'
+  ipAddress String?
+  userAgent String?
+  details   String?  // JSON string for additional details
+  createdAt DateTime @default(now())
+
+  // Optional relation to User - can be null for failed logins with non-existent accounts
+  user      User?    @relation(fields: [userId], references: [id], onDelete: SetNull)
+  userId    String?
 }

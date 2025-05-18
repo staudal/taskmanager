@@ -38,10 +38,8 @@ export const loader = async ({ request, params }: LoaderFunctionArgs) => {
   const taskId = params.taskId;
   const accessLevel = await getAccessLevelToTask(taskId, userId);
 
-  if (accessLevel === "viewer") {
-    throw new Response("You don't have permission to share this task", {
-      status: 403,
-    });
+  if (accessLevel === "viewer" || accessLevel === "editor") {
+    throw new Response("Not Found", { status: 404 });
   }
 
   const task = await getTask({ id: taskId, userId });

@@ -9,6 +9,7 @@ import { useEffect, useRef } from "react";
 
 import AuthForm from "~/components/auth-form";
 import { checkRateLimit } from "~/lib/rate-limiter";
+import { logFailedLogin, logSuccessfulLogin } from "~/models/audit-log.server";
 import { verifyLogin } from "~/models/user.server";
 import { createUserSession, getUserId } from "~/session.server";
 import { safeRedirect, validateEmail } from "~/utils";
@@ -36,6 +37,7 @@ export const action = async ({ request }: ActionFunctionArgs) => {
   }
 
   if (typeof password !== "string" || password.length === 0) {
+    await logFailedLogin(email as string, "Password is required", request);
     return json(
       { errors: { email: null, password: "Password is required" } },
       { status: 400 },
@@ -43,20 +45,25 @@ export const action = async ({ request }: ActionFunctionArgs) => {
   }
 
   if (password.length < 8) {
+    await logFailedLogin(email as string, "Password too short", request);
     return json(
       { errors: { email: null, password: "Password is too short" } },
       { status: 400 },
     );
   }
 
-  const user = await verifyLogin(email, password);
+  const user = await verifyLogin(email as string, password);
 
   if (!user) {
+    await logFailedLogin(email as string, "Invalid credentials", request);
     return json(
       { errors: { email: "Invalid email or password", password: null } },
       { status: 400 },
     );
   }
+
+  // Log successful login
+  await logSuccessfulLogin(user.id, request);
 
   return createUserSession({
     redirectTo,
