@@ -4,10 +4,14 @@ import { useActionData } from "@remix-run/react";
 import { useEffect, useRef, useState } from "react";
 
 import { TaskForm } from "~/components/task-form";
+import { checkRateLimit } from "~/lib/rate-limiter";
 import { createTask } from "~/models/task.server";
 import { requireUserId } from "~/session.server";
 
 export const action = async ({ request }: ActionFunctionArgs) => {
+  const rateLimitResponse = await checkRateLimit(request);
+  if (rateLimitResponse) throw rateLimitResponse;
+
   const userId = await requireUserId(request);
 
   const formData = await request.formData();

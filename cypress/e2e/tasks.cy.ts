@@ -95,36 +95,48 @@ describe("tasks tests", () => {
       cy.createTask(testTask);
       cy.findByText(testTask.title).click();
 
-      cy.findByText("Move to Todo").should("not.exist");
-      cy.findByText("Move to In Progress").should("exist");
-      cy.findByText("Move to Done").should("not.exist");
+      cy.findByTestId("move-to-todo-button").should("not.exist");
+      cy.findByTestId("move-to-in-progress-button").should("exist");
+      cy.findByTestId("move-to-done-button").should("not.exist");
     });
 
     it("should show 'Move to Todo' and 'Move to Done' buttons when task is in 'In Progress' state", () => {
       cy.createTask(testTask);
       cy.findByText(testTask.title).click();
 
-      cy.findByRole("button", { name: /move to in progress/i }).click();
+      // Click the button and wait for the status to update
+      cy.findByTestId("move-to-in-progress-button").click();
+
+      // Wait for the redirect to complete
+      cy.location("pathname").should("eq", "/tasks");
+
+      // Navigate back to the task detail page
       cy.findByText(testTask.title).click();
 
-      cy.findByText("Move to Todo").should("exist");
-      cy.findByText("Move to In Progress").should("not.exist");
-      cy.findByText("Move to Done").should("exist");
+      // Check for the correct buttons
+      cy.findByTestId("move-to-todo-button").should("exist");
+      cy.findByTestId("move-to-in-progress-button").should("not.exist");
+      cy.findByTestId("move-to-done-button").should("exist");
     });
 
     it("should show 'Move to In Progress' button when task is in 'Done' state", () => {
       cy.createTask(testTask);
       cy.findByText(testTask.title).click();
 
-      cy.findByRole("button", { name: /move to in progress/i }).click();
+      // Move to In Progress
+      cy.findByTestId("move-to-in-progress-button").click();
+      cy.location("pathname").should("eq", "/tasks");
       cy.findByText(testTask.title).click();
 
-      cy.findByRole("button", { name: /move to done/i }).click();
+      // Move to Done
+      cy.findByTestId("move-to-done-button").click();
+      cy.location("pathname").should("eq", "/tasks");
       cy.findByText(testTask.title).click();
 
-      cy.findByText("Move to Todo").should("not.exist");
-      cy.findByText("Move to In Progress").should("exist");
-      cy.findByText("Move to Done").should("not.exist");
+      // Check for the correct button
+      cy.findByTestId("move-to-todo-button").should("not.exist");
+      cy.findByTestId("move-to-in-progress-button").should("exist");
+      cy.findByTestId("move-to-done-button").should("not.exist");
     });
   });
 

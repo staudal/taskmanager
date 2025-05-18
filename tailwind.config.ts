@@ -6,6 +6,32 @@ export default {
   content: ["./app/**/*.{js,jsx,ts,tsx}"],
   theme: {
     extend: {
+      keyframes: {
+        "pulse-success": {
+          "0%, 100%": {
+            transform: "scale(1)",
+            boxShadow: "0 0 0 0 rgba(34, 197, 94, 0.7)",
+          },
+          "50%": {
+            transform: "scale(1.3)",
+            boxShadow: "0 0 0 10px rgba(34, 197, 94, 0)",
+          },
+        },
+        "pulse-error": {
+          "0%, 100%": {
+            transform: "scale(1)",
+            boxShadow: "0 0 0 0 rgba(239, 68, 68, 0.7)",
+          },
+          "50%": {
+            transform: "scale(1.3)",
+            boxShadow: "0 0 0 10px rgba(239, 68, 68, 0)",
+          },
+        },
+      },
+      animation: {
+        "pulse-success": "pulse-success 1.5s ease-in-out",
+        "pulse-error": "pulse-error 1.5s ease-in-out",
+      },
       borderRadius: {
         lg: "var(--radius)",
         md: "calc(var(--radius) - 2px)",

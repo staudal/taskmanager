@@ -52,7 +52,7 @@ export function TaskFooterButtons({
             className="flex items-center gap-2"
           >
             <Trash size={16} />
-            <span>Delete Task</span>
+            <span>Delete task</span>
           </Button>
         </Form>
       ) : null}

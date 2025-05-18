@@ -6,6 +6,7 @@ import invariant from "tiny-invariant";
 
 import { PageTitle } from "~/components/page-title";
 import { TaskForm } from "~/components/task-form";
+import { checkRateLimit } from "~/lib/rate-limiter";
 import { getTask, updateTask } from "~/models/task.server";
 import { requireUserId } from "~/session.server";
 
@@ -21,6 +22,9 @@ export const loader = async ({ params, request }: LoaderFunctionArgs) => {
 };
 
 export const action = async ({ params, request }: ActionFunctionArgs) => {
+  const rateLimitResponse = await checkRateLimit(request);
+  if (rateLimitResponse) throw rateLimitResponse;
+
   const userId = await requireUserId(request);
   invariant(params.taskId, "taskId not found");
 

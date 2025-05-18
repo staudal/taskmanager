@@ -16,7 +16,7 @@ export function PageTitle({
   const pathname = useLocation().pathname;
 
   const handleClickBack = () => {
-    if (pathname.includes("/edit")) {
+    if (pathname.includes("/edit") || pathname.includes("/share")) {
       navigate(`/tasks/${taskId}`);
     } else {
       navigate("/tasks");

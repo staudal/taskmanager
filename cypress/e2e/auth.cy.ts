@@ -34,10 +34,17 @@ describe("auth tests", () => {
     cy.findByText(/user already exists/i).should("exist");
   });
 
-  it("should show error when user enters wrong email or password", () => {
+  it("should show error when user enters wrong password", () => {
     cy.signup(testUser);
     cy.logout();
     cy.login({ email: testUser.email, password: "wrongpassword" });
+    cy.findByText(/Invalid email or password/i).should("exist");
+  });
+
+  it("should show error when user enters wrong email", () => {
+    cy.signup(testUser);
+    cy.logout();
+    cy.login({ email: "wrongemail@example.com", password: testUser.password });
     cy.findByText(/Invalid email or password/i).should("exist");
   });
 
@@ -52,9 +59,14 @@ describe("auth tests", () => {
     cy.checkPathname("/join");
   });
 
-  it("should show warning when password is too short", () => {
-    cy.signup({ email: testUser.email, password: "short" });
+  it("should show warning when password is 7 characters", () => {
+    cy.signup({ email: testUser.email, password: "1234567" });
     cy.findByText(/Password is too short/i).should("exist");
+  });
+
+  it("should show no warning when password is 8 characters", () => {
+    cy.signup({ email: testUser.email, password: "12345678" });
+    cy.findByText(/Password is too short/i).should("not.exist");
   });
 
   it("should log in as random user when using the quickCreateUser and quickLogin methods", () => {

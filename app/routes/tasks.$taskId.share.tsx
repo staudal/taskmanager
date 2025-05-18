@@ -9,10 +9,19 @@ import { useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
 import invariant from "tiny-invariant";
 
+import { PageTitle } from "~/components/page-title";
 import { Button } from "~/components/ui/button";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "~/components/ui/card";
 import { Input } from "~/components/ui/input";
 import { Label } from "~/components/ui/label";
 import { RadioGroup, RadioGroupItem } from "~/components/ui/radio-group";
+import { checkRateLimit } from "~/lib/rate-limiter";
 import {
   getAccessLevelToTask,
   getTask,
@@ -47,6 +56,9 @@ export const loader = async ({ request, params }: LoaderFunctionArgs) => {
 };
 
 export const action = async ({ request, params }: ActionFunctionArgs) => {
+  const rateLimitResponse = await checkRateLimit(request);
+  if (rateLimitResponse) throw rateLimitResponse;
+
   const userId = await requireUserId(request);
   const formData = await request.formData();
   const taskId = params.taskId as string;
@@ -152,129 +164,150 @@ export default function ShareTaskPage() {
   const isSubmitting = navigation.state === "submitting";
 
   return (
-    <div className="mx-auto max-w-xl">
-      <h2 className="text-2xl font-bold">Share Task: {task.title}</h2>
+    <div className="flex flex-col gap-6">
+      <PageTitle
+        title={`Share Task: ${task.title}`}
+        backButton
+        taskId={task.id}
+      />
+      <div className="flex w-full flex-row items-start gap-6">
+        <Card className="w-full">
+          <CardHeader>
+            <CardTitle>Share with a user</CardTitle>
+            <CardDescription>
+              Search for an existing user and share your task with them.
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <Form method="post" ref={formRef}>
+              <input type="hidden" name="_action" value="search_users" />
+              <div className="flex gap-2">
+                <Input
+                  name="searchTerm"
+                  placeholder="Search by email..."
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                  className="flex-1"
+                />
+                <Button type="submit" disabled={!searchTerm || isSubmitting}>
+                  Search
+                </Button>
+              </div>
+            </Form>
 
-      {/* Search for users */}
-      <div className="mt-6">
-        <h3 className="mb-2 text-lg font-semibold">Share with a user</h3>
-        <Form method="post" ref={formRef}>
-          <input type="hidden" name="_action" value="search_users" />
-          <div className="flex gap-2">
-            <Input
-              name="searchTerm"
-              placeholder="Search by email..."
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              className="flex-1"
-            />
-            <Button type="submit" disabled={!searchTerm || isSubmitting}>
-              Search
-            </Button>
-          </div>
-        </Form>
+            {searchResults.length > 0 ? (
+              <div className="mt-4 overflow-hidden">
+                <ul className="flex flex-col gap-2">
+                  {searchResults.map((user) => (
+                    <li key={user.id}>
+                      <Button
+                        variant={"outline"}
+                        className="w-full"
+                        onClick={() => handleUserSelect(user)}
+                      >
+                        {user.email}
+                      </Button>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            ) : hasSearched ? (
+              <div className="mt-4 rounded-md border border-gray-200 p-3 text-center text-sm text-gray-500">
+                No users found matching your search.
+              </div>
+            ) : null}
 
-        {/* Show search results */}
-        {searchResults.length > 0 ? (
-          <div className="mt-4 overflow-hidden rounded-md border">
-            <ul>
-              {searchResults.map((user) => (
-                <li key={user.id}>
-                  <button
-                    type="button"
-                    className="w-full p-2 text-left hover:bg-gray-100"
-                    onClick={() => handleUserSelect(user)}
-                  >
-                    {user.email}
-                  </button>
-                </li>
-              ))}
-            </ul>
-          </div>
-        ) : hasSearched ? (
-          <div className="mt-4 rounded-md border border-gray-200 p-3 text-center text-gray-500">
-            No users found matching your search.
-          </div>
-        ) : null}
+            {selectedUser ? (
+              <Form method="post" className="mt-4 rounded-md border p-4">
+                <input type="hidden" name="_action" value="share_task" />
+                <input type="hidden" name="userId" value={selectedUser.id} />
 
-        {/* Share form */}
-        {selectedUser ? (
-          <Form method="post" className="mt-4 rounded-md border p-4">
-            <input type="hidden" name="_action" value="share_task" />
-            <input type="hidden" name="userId" value={selectedUser.id} />
-
-            <div className="mb-4">
-              <p>
-                Share with: <strong>{selectedUser.email}</strong>
-              </p>
-            </div>
-
-            <div className="mb-4">
-              <Label>Access Level</Label>
-              <RadioGroup
-                name="accessLevel"
-                value={accessLevel}
-                onValueChange={setAccessLevel}
-                className="mt-2 flex space-x-4"
-              >
-                <div className="flex items-center space-x-2">
-                  <RadioGroupItem value="viewer" id="viewer" />
-                  <Label htmlFor="viewer">Viewer</Label>
-                </div>
-                <div className="flex items-center space-x-2">
-                  <RadioGroupItem value="editor" id="editor" />
-                  <Label htmlFor="editor">Editor</Label>
-                </div>
-              </RadioGroup>
-            </div>
-
-            <Button type="submit" disabled={isSubmitting}>
-              {isSubmitting ? "Sharing..." : "Share Task"}
-            </Button>
-          </Form>
-        ) : null}
-      </div>
-
-      {/* List of users who already have access */}
-      <div className="mt-8">
-        <h3 className="mb-2 text-lg font-semibold">Users with access</h3>
-
-        {accessUsers.length === 0 ? (
-          <p className="text-gray-500">
-            No users have access to this task yet.
-          </p>
-        ) : (
-          <ul className="divide-y rounded-md border">
-            {accessUsers.map((access) => (
-              <li
-                key={access.id}
-                className="flex items-center justify-between p-4"
-              >
-                <div>
-                  <p>{access.user.email}</p>
-                  <p className="text-sm capitalize text-gray-500">
-                    Access Level: {access.accessLevel}
+                <div className="mb-4">
+                  <p>
+                    Share with: <strong>{selectedUser.email}</strong>
                   </p>
                 </div>
-                <Form method="post">
-                  <input type="hidden" name="_action" value="remove_access" />
-                  <input type="hidden" name="userId" value={access.user.id} />
-                  <Button
-                    variant="destructive"
-                    size="sm"
-                    type="submit"
-                    disabled={isSubmitting}
+
+                <div className="mb-4">
+                  <Label>Access Level</Label>
+                  <RadioGroup
+                    name="accessLevel"
+                    value={accessLevel}
+                    onValueChange={setAccessLevel}
+                    className="mt-2 flex space-x-4"
                   >
-                    Remove
-                  </Button>
-                </Form>
-              </li>
-            ))}
-          </ul>
-        )}
+                    <div className="flex items-center space-x-2">
+                      <RadioGroupItem value="viewer" id="viewer" />
+                      <Label htmlFor="viewer">Viewer</Label>
+                    </div>
+                    <div className="flex items-center space-x-2">
+                      <RadioGroupItem value="editor" id="editor" />
+                      <Label htmlFor="editor">Editor</Label>
+                    </div>
+                  </RadioGroup>
+                </div>
+
+                <Button type="submit" disabled={isSubmitting}>
+                  {isSubmitting ? "Sharing..." : "Share Task"}
+                </Button>
+              </Form>
+            ) : null}
+          </CardContent>
+        </Card>
+
+        <Card className="w-full">
+          <CardHeader>
+            <CardTitle>Users with access</CardTitle>
+            <CardDescription>
+              These are the users that have access to this task.
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            {accessUsers.length === 0 ? (
+              <p className="text-sm text-gray-500">
+                No users have access to this task yet.
+              </p>
+            ) : (
+              <ul className="divide-y rounded-md border">
+                {accessUsers.map((access) => (
+                  <li
+                    key={access.id}
+                    className="flex items-center justify-between p-4"
+                  >
+                    <div>
+                      <p>{access.user.email}</p>
+                      <p className="text-sm capitalize text-gray-500">
+                        Access Level: {access.accessLevel}
+                      </p>
+                    </div>
+                    <Form method="post">
+                      <input
+                        type="hidden"
+                        name="_action"
+                        value="remove_access"
+                      />
+                      <input
+                        type="hidden"
+                        name="userId"
+                        value={access.user.id}
+                      />
+                      <Button
+                        variant="destructive"
+                        size="sm"
+                        type="submit"
+                        disabled={isSubmitting}
+                      >
+                        Remove
+                      </Button>
+                    </Form>
+                  </li>
+                ))}
+              </ul>
+            )}
+          </CardContent>
+        </Card>
       </div>
 
-      {/* Error message */}
       {actionData && "error" in actionData ? (
         <div className="mt-4 rounded bg-red-100 p-2 text-red-700">
           {actionData.error}
