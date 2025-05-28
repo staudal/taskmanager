@@ -213,6 +213,7 @@ describe("tasks tests", () => {
 
       cy.findByText("Users with access")
         .parent()
+        .parent()
         .within(() => {
           cy.findByText(userTwo.email).should("exist");
         });
@@ -233,6 +234,7 @@ describe("tasks tests", () => {
 
       cy.findByText("Users with access")
         .parent()
+        .parent()
         .within(() => {
           cy.findByText(userTwo.email).should("exist");
         });
@@ -240,6 +242,7 @@ describe("tasks tests", () => {
       cy.findByRole("button", { name: /remove/i }).click();
 
       cy.findByText("Users with access")
+        .parent()
         .parent()
         .within(() => {
           cy.findByText(userTwo.email).should("not.exist");
@@ -252,6 +255,7 @@ describe("tasks tests", () => {
       cy.findByRole("link", { name: /share/i }).click();
 
       cy.findByText("Users with access")
+        .parent()
         .parent()
         .within(() => {
           cy.findByText("No users have access to this task yet.").should(
@@ -274,6 +278,7 @@ describe("tasks tests", () => {
       cy.findByRole("button", { name: /share task/i }).click();
 
       cy.findByText("Users with access")
+        .parent()
         .parent()
         .within(() => {
           cy.findByText(userTwo.email).should("exist");
@@ -308,6 +313,7 @@ describe("tasks tests", () => {
       cy.findByRole("button", { name: /share task/i }).click();
 
       cy.findByText("Users with access")
+        .parent()
         .parent()
         .within(() => {
           cy.findByText(userTwo.email).should("exist");
@@ -347,6 +353,7 @@ describe("tasks tests", () => {
 
       cy.findByText("Users with access")
         .parent()
+        .parent()
         .within(() => {
           cy.findByText(userTwo.email).should("exist");
           cy.findByText("Access Level: viewer").should("exist");
@@ -385,6 +392,7 @@ describe("tasks tests", () => {
       cy.findByRole("button", { name: /share task/i }).click();
 
       cy.findByText("Users with access")
+        .parent()
         .parent()
         .within(() => {
           cy.findByText(userTwo.email).should("exist");
@@ -442,6 +450,7 @@ describe("tasks tests", () => {
 
       cy.findByText("Users with access")
         .parent()
+        .parent()
         .within(() => {
           cy.findByText(userTwo.email).should("exist");
           cy.findByText("Access Level: viewer").should("exist");
@@ -467,6 +476,7 @@ describe("tasks tests", () => {
       cy.findByRole("link", { name: /share/i }).click();
 
       cy.findByText("Users with access")
+        .parent()
         .parent()
         .within(() => {
           cy.findByText(userTwo.email).should("exist");
